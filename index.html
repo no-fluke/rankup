@@ -6,9 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
+    * { box-sizing: border-box; }
+
     body {
       margin: 0;
-      font-family: system-ui, Arial;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
       background: linear-gradient(135deg, #eef2ff, #f8fafc);
       min-height: 100vh;
       display: flex;
@@ -25,19 +27,28 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
 
     .brand {
       font-size: 22px;
       font-weight: 700;
+      color: #111827;
     }
 
-    .nav a {
-      margin-left: 14px;
+    .nav a, .nav button {
+      margin-left: 12px;
       text-decoration: none;
-      color: #4f46e5;
+      font-size: 14px;
       font-weight: 600;
+      color: #4f46e5;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .logout {
+      color: #ef4444;
     }
 
     .card {
@@ -57,6 +68,7 @@
       border-radius: 8px;
       text-decoration: none;
       font-weight: 600;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -66,52 +78,68 @@
 
   <header>
     <div class="brand">RANKUP</div>
-    <div class="nav">
-      <a href="login.html">Login</a>
-      <a href="signup.html">Sign up</a>
+
+    <!-- NAV AREA -->
+    <div class="nav" id="navArea">
+      <!-- Filled by JS -->
     </div>
   </header>
 
-  <!-- EXAMS WILL LOAD HERE -->
-  <div id="examList"></div>
+  <!-- EXAMS -->
+  <div class="card">
+    <h2>SSC Exams</h2>
+    <p>SSC CGL, CHSL, GD and more</p>
+    <a class="quiz-btn" href="exams/ssc/cgl/quiz1.html">
+      Start SSC CGL Quiz
+    </a>
+  </div>
+
+  <div class="card">
+    <h2>UPSC Exams</h2>
+    <p>Prelims & Mains practice</p>
+  </div>
 
 </div>
 
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
 <script>
-  // ✅ ADD / REMOVE EXAMS HERE ONLY
-  const exams = [
-    {
-      name: "SSC",
-      description: "SSC CGL, CHSL, GD and more",
-      link: "exams/ssc/index.html"
-    },
-    {
-      name: "UPSC",
-      description: "Prelims & Mains practice",
-      link: "exams/upsc/index.html"
-    },
-    {
-      name: "Banking",
-      description: "IBPS, SBI PO & Clerk",
-      link: "exams/banking/index.html"
+  const firebaseConfig = {
+    apiKey: "AIzaSyAQk0dJayCyv8gfDGsYW-XSYC5n13oWvpA",
+    authDomain: "ssc-journey.firebaseapp.com",
+    projectId: "ssc-journey"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  const nav = document.getElementById("navArea");
+
+  // ✅ CHECK LOGIN STATE (NO REDIRECT)
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      // Logged in → show name + logout
+      nav.innerHTML = `
+        <span style="font-size:14px;margin-right:10px">
+          ${user.displayName || user.email}
+        </span>
+        <button class="logout" id="logoutBtn">Logout</button>
+      `;
+
+      document.getElementById("logoutBtn").onclick = () => {
+        auth.signOut().then(() => {
+          location.reload();
+        });
+      };
+    } else {
+      // Not logged in → show login/signup
+      nav.innerHTML = `
+        <a href="login.html">Login</a>
+        <a href="signup.html">Sign up</a>
+      `;
     }
-  ];
-
-  const container = document.getElementById("examList");
-
-  exams.forEach(exam => {
-    const card = document.createElement("div");
-    card.className = "card";
-
-    card.innerHTML = `
-      <h2>${exam.name}</h2>
-      <p>${exam.description}</p>
-      <a class="quiz-btn" href="${exam.link}">
-        Explore ${exam.name}
-      </a>
-    `;
-
-    container.appendChild(card);
   });
 </script>
 
